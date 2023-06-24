@@ -17,8 +17,8 @@ To run the demo project, follow these steps:
 5. Start adding 3D boxes to your environment using hand gestures.
 
 ## Requirements
-- Xcode 12 or later
-- iOS 14 or later
+- Xcode 14 or later
+- iOS 16 or later
 - ARKit-supported device
 
 ## Contributions
