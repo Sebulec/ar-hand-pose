@@ -105,38 +105,45 @@ class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
         
         // Create a handler to perform the hand pose detection
         let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .right ,options: [:])
-        
-        do {
-            // Perform hand pose detection
-            try handler.perform([handPoseRequest])
-            
-            // Access the detected hands
-            if let observation = handPoseRequest.results?.first as? VNHumanHandPoseObservation {
-                // Get the points representing the hand joints
-                let jointPoints = try observation.recognizedPoints(.all)
-                
-                if let jointPoint = jointPoints[.thumbTip] {
-                    obtainJointPointAndUpdatePosition(jointPoint, layer: thumbTipLayer)
-                } else {
-                    thumbTipLayer.isHidden = true
-                }
-                if let jointPoint = jointPoints[.indexTip] {
-                    obtainJointPointAndUpdatePosition(jointPoint, layer: indexTipLayer)
-                } else {
-                    indexTipLayer.isHidden = true
-                }
-                
-                verifyIfHandIsPinching()
-            } else {
-                print("\(Date.now): No hands")
-                thumbTipLayer.isHidden = true
-                indexTipLayer.isHidden = true
+
+        Task {
+            do {
+                try await performRequest(handler: handler)
+            } catch {
+                print("Error performing hand pose detection: \(error)")
             }
-        } catch {
-            print("Error performing hand pose detection: \(error)")
         }
     }
-    
+
+    private func performRequest(handler: VNImageRequestHandler) async throws {
+        // Perform hand pose detection
+        try handler.perform([handPoseRequest])
+
+        // Access the detected hands
+        if let observation = handPoseRequest.results?.first as? VNHumanHandPoseObservation {
+            // Get the points representing the hand joints
+            let jointPoints = try observation.recognizedPoints(.all)
+
+            if let jointPoint = jointPoints[.thumbTip] {
+                obtainJointPointAndUpdatePosition(jointPoint, layer: thumbTipLayer)
+            } else {
+                thumbTipLayer.isHidden = true
+            }
+            if let jointPoint = jointPoints[.indexTip] {
+                obtainJointPointAndUpdatePosition(jointPoint, layer: indexTipLayer)
+            } else {
+                indexTipLayer.isHidden = true
+            }
+            await MainActor.run {
+                verifyIfHandIsPinching()
+            }
+        } else {
+            print("\(Date.now): No hands")
+            thumbTipLayer.isHidden = true
+            indexTipLayer.isHidden = true
+        }
+    }
+
     private func shouldProcessImageHandRequest(from frame: ARFrame) -> Bool {
         let timestamp = frame.timestamp
         guard let lastFrameTimestamp = lastFrameTimestamp else {
