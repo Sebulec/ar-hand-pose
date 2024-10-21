@@ -19,11 +19,9 @@ class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
     }
 
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
-        //        return
         let pixelBuffer = frame.capturedImage
         let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .right, options: [:])
 
-        //        Task {
         DispatchQueue.global().sync { [weak self] in
             do {
                 try self?.performRequest(handler: handler)
@@ -31,7 +29,6 @@ class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
                 print("Error performing hand pose detection: \(error)")
             }
         }
-        //        }
     }
 
     private func performRequest(handler: VNImageRequestHandler) throws {
@@ -40,11 +37,9 @@ class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
         if let observation = handPoseRequest.results?.first as? VNHumanHandPoseObservation {
             let jointPoints = try observation.recognizedPoints(.all)
             updateFingerTipPositions(jointPoints)
-            //            await MainActor.run {
-            DispatchQueue.main.async {
-                self.verifyIfHandIsPinching()
+            DispatchQueue.main.async { [weak self] in
+                self?.verifyIfHandIsPinching()
             }
-            //            }
         } else {
             print("\(Date.now): No hands")
             thumbTipLayer.isHidden = true
@@ -99,7 +94,6 @@ class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
 
     // Add the attachMeshToScene method
     func attachMeshToScene(in arView: ARSCNView) {
-
         // Create a box geometry
         let boxGeometry = SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0.005)
 
@@ -130,50 +124,6 @@ class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
 
         // Add the anchor node to the scene
         arView.scene.rootNode.addChildNode(anchorNode)
-
-        // Set up a delegate to handle anchor updates
-        arView.delegate = self
-
-
-
-
-
-        // Create a box geometry
-        //        let box = SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0.005)
-        //
-        //        // Create a material for the box
-        //        let material = SCNMaterial()
-        //        material.diffuse.contents = UIColor.red
-        //        material.metalness.contents = 1.0
-        //        material.roughness.contents = 0.15
-        //        box.materials = [material]
-        //
-        //        // Create a node with the box geometry
-        //        let boxNode = SCNNode(geometry: box)
-        //
-        //        // Create an ARAnchor for horizontal plane
-        //        let anchor = ARAnchor(transform: simd_float4x4(1))
-        //
-        //        // Add the anchor to the AR session
-        //        arView.session.add(anchor: anchor)
-        //
-        //        // When the anchor is added, the renderer delegate will be called to attach the node to the anchor
-        //        arView.scene.rootNode.addChildNode(boxNode)
-
-
-
-
-        //        let mesh = MeshResource.generateBox(size: 0.1, cornerRadius: 0.005)
-        //        let material = SimpleMaterial(color: .red, roughness: 0.15, isMetallic: true)
-        //        let model = ModelEntity(mesh: mesh, materials: [material])
-        //
-        //        // Create horizontal plane anchor for the content
-        //        let anchor = AnchorEntity(.plane(.horizontal, classification: .any, minimumBounds: SIMD2<Float>(0.2, 0.2)))
-        //        anchor.children.append(model)
-        //
-        //        // Add the horizontal plane anchor to the scene
-        //        arView.session.add(anchor: anchor)
-        ////        arView.scene.anchors.append(anchor)
     }
 }
 
@@ -197,19 +147,4 @@ func performHitTestForHorizontalPlane(in arView: ARSCNView) -> SCNVector3? {
 
     // Return nil if no plane was found
     return nil
-}
-
-extension SessionHandler: ARSCNViewDelegate {
-    func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        if let planeAnchor = anchor as? ARPlaneAnchor {
-            print("Plane detected")
-            // Get the position of the plane in world coordinates
-//            let position = SCNVector3(planeAnchor.center.x, 0, planeAnchor.center.z)
-
-            // Attach the mesh (box) to the detected plane
-//            attachMeshToScene(in: arView, at: position)
-        }
-
-        return nil
-    }
 }
