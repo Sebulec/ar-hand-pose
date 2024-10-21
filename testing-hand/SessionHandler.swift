@@ -118,6 +118,9 @@ class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
         // Create a horizontal plane anchor for the content
         let planeAnchor = ARAnchor(name: "horizontalPlane", transform: simd_float4x4(SCNMatrix4Identity))
 
+        if let position = performHitTestForHorizontalPlane(in: arView) {
+            boxNode.position = position
+        }
         // Add the anchor to the session
         arView.session.add(anchor: planeAnchor)
 
@@ -172,6 +175,28 @@ class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
         //        arView.session.add(anchor: anchor)
         ////        arView.scene.anchors.append(anchor)
     }
+}
+
+func performHitTestForHorizontalPlane(in arView: ARSCNView) -> SCNVector3? {
+    // Get the center point of the screen
+    let screenCenter = CGPoint(x: arView.bounds.midX, y: arView.bounds.midY)
+
+    // Perform a hit test at the center of the screen
+    let hitTestResults = arView.hitTest(screenCenter, types: .estimatedHorizontalPlane)
+
+    // Check if we hit a horizontal plane
+    if let result = hitTestResults.first {
+        // Get the world transform of the hit test result (position in the real world)
+        let hitPosition = SCNVector3(
+            x: result.worldTransform.columns.3.x,
+            y: result.worldTransform.columns.3.y,
+            z: result.worldTransform.columns.3.z
+        )
+        return hitPosition
+    }
+
+    // Return nil if no plane was found
+    return nil
 }
 
 extension SessionHandler: ARSCNViewDelegate {
