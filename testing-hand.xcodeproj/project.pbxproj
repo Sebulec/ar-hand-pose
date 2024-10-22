@@ -13,7 +13,6 @@
 		90A6989F2CC6D53400C8D2C8 /* ARKitExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90A6989B2CC6D4DC00C8D2C8 /* ARKitExtensions.swift */; };
 		EC673F592A471DDD00D22597 /* OperationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC673F582A471DDD00D22597 /* OperationManager.swift */; };
 		EC9EDA2C2A386AD4004E77C0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC9EDA2B2A386AD4004E77C0 /* AppDelegate.swift */; };
-		EC9EDA2E2A386AD4004E77C0 /* OldContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC9EDA2D2A386AD4004E77C0 /* OldContentView.swift */; };
 		EC9EDA302A386AD4004E77C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EC9EDA2F2A386AD4004E77C0 /* Assets.xcassets */; };
 		EC9EDA332A386AD4004E77C0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EC9EDA322A386AD4004E77C0 /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -42,7 +41,6 @@
 		EC673F582A471DDD00D22597 /* OperationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationManager.swift; sourceTree = "<group>"; };
 		EC9EDA282A386AD4004E77C0 /* testing-hand.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "testing-hand.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EC9EDA2B2A386AD4004E77C0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		EC9EDA2D2A386AD4004E77C0 /* OldContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OldContentView.swift; sourceTree = "<group>"; };
 		EC9EDA2F2A386AD4004E77C0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EC9EDA322A386AD4004E77C0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -93,7 +91,6 @@
 				90A698952CC6D46000C8D2C8 /* ContentView.swift */,
 				EC60A6782A3C574200A1EFAA /* Info.plist */,
 				EC9EDA2B2A386AD4004E77C0 /* AppDelegate.swift */,
-				EC9EDA2D2A386AD4004E77C0 /* OldContentView.swift */,
 				EC9EDA2F2A386AD4004E77C0 /* Assets.xcassets */,
 				EC9EDA312A386AD4004E77C0 /* Preview Content */,
 				EC673F582A471DDD00D22597 /* OperationManager.swift */,
@@ -180,7 +177,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EC9EDA2E2A386AD4004E77C0 /* OldContentView.swift in Sources */,
 				EC9EDA2C2A386AD4004E77C0 /* AppDelegate.swift in Sources */,
 				90A6989F2CC6D53400C8D2C8 /* ARKitExtensions.swift in Sources */,
 				90A6989E2CC6D52700C8D2C8 /* SessionHandler.swift in Sources */,

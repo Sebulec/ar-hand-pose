@@ -7,14 +7,14 @@ class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
     var attachMesh: (() -> ())?
 
     private let manager = OperationManager()
-    private var thumbTipLayer: CALayer!
-    private var indexTipLayer: CALayer!
+    private var thumbTipView: UIView!
+    private var indexTipView: UIView!
     private var handPoseRequest = VNDetectHumanHandPoseRequest()
     private var lastFrameTimestamp: TimeInterval?
 
     func createCircleForThumb(view: UIView) {
-        thumbTipLayer = createFingerSignLayer(view: view)
-        indexTipLayer = createFingerSignLayer(view: view)
+        thumbTipView = createFingerView(in: view)
+        indexTipView = createFingerView(in: view)
         handPoseRequest.maximumHandCount = 2
     }
 
@@ -36,63 +36,64 @@ class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
 
         if let observation = handPoseRequest.results?.first as? VNHumanHandPoseObservation {
             let jointPoints = try observation.recognizedPoints(.all)
-            updateFingerTipPositions(jointPoints)
             DispatchQueue.main.async { [weak self] in
+                self?.updateFingerTipPositions(jointPoints)
                 self?.verifyIfHandIsPinching()
             }
         } else {
             print("\(Date.now): No hands")
-            thumbTipLayer.isHidden = true
-            indexTipLayer.isHidden = true
+            thumbTipView.isHidden = true
+            indexTipView.isHidden = true
         }
     }
 
     private func updateFingerTipPositions(_ jointPoints: [VNHumanHandPoseObservation.JointName: VNRecognizedPoint]) {
         if let jointPoint = jointPoints[.thumbTip] {
-            obtainJointPointAndUpdatePosition(jointPoint, layer: thumbTipLayer)
+            obtainJointPointAndUpdatePosition(jointPoint, layer: thumbTipView)
         } else {
-            thumbTipLayer.isHidden = true
+            thumbTipView.isHidden = true
         }
         if let jointPoint = jointPoints[.indexTip] {
-            obtainJointPointAndUpdatePosition(jointPoint, layer: indexTipLayer)
+            obtainJointPointAndUpdatePosition(jointPoint, layer: indexTipView)
         } else {
-            indexTipLayer.isHidden = true
+            indexTipView.isHidden = true
         }
     }
 
-    private func obtainJointPointAndUpdatePosition(_ jointPoint: VNRecognizedPoint, layer: CALayer) {
+    private func obtainJointPointAndUpdatePosition(_ jointPoint: VNRecognizedPoint, layer: UIView) {
         let screenFingerTipPoint = convertPointFromVision(point: jointPoint.location, frameSize: UIScreen.main.bounds.size)
-        layer.position = screenFingerTipPoint
+        layer.frame.origin = screenFingerTipPoint
         layer.isHidden = false
     }
 
     private func verifyIfHandIsPinching() {
-        if CGPointDistance(from: thumbTipLayer.position, to: indexTipLayer.position) > 30 {
-            thumbTipLayer.backgroundColor = UIColor.green.cgColor
-            indexTipLayer.backgroundColor = UIColor.green.cgColor
+        if thumbTipView.frame.origin.distance(to: indexTipView.frame.origin) > 30 {
+            thumbTipView.backgroundColor = UIColor.green
+            indexTipView.backgroundColor = UIColor.green
         } else {
-            thumbTipLayer.backgroundColor = UIColor.black.cgColor
-            indexTipLayer.backgroundColor = UIColor.black.cgColor
+            thumbTipView.backgroundColor = UIColor.black
+            indexTipView.backgroundColor = UIColor.black
             performAttachMech()
         }
     }
 
     private func performAttachMech() {
         guard let attachMesh = attachMesh else { return }
+
         manager.performOperation(action: attachMesh)
     }
 
-    private func createFingerSignLayer(view: UIView) -> CALayer {
-        let fingerLayer = CALayer()
-        fingerLayer.bounds = CGRect(x: 0, y: 0, width: 10, height: 10)
-        fingerLayer.backgroundColor = UIColor.green.cgColor
-        fingerLayer.cornerRadius = 10
-        fingerLayer.isHidden = true
-        view.layer.addSublayer(fingerLayer)
-        return fingerLayer
+    private func createFingerView(in view: UIView) -> UIView {
+        let finger = UIView(frame: .init(x: 0, y: 0, width: 10, height: 10))
+
+        finger.backgroundColor = .green
+        finger.layer.cornerRadius = 10
+        finger.isHidden = true
+        view.addSubview(finger)
+
+        return finger
     }
 
-    // Add the attachMeshToScene method
     func attachMeshToScene(in arView: ARSCNView) {
         // Create a box geometry
         let boxGeometry = SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0.005)
@@ -125,26 +126,26 @@ class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
         // Add the anchor node to the scene
         arView.scene.rootNode.addChildNode(anchorNode)
     }
-}
 
-func performHitTestForHorizontalPlane(in arView: ARSCNView) -> SCNVector3? {
-    // Get the center point of the screen
-    let screenCenter = CGPoint(x: arView.bounds.midX, y: arView.bounds.midY)
+    private func performHitTestForHorizontalPlane(in arView: ARSCNView) -> SCNVector3? {
+        // Get the center point of the screen
+        let screenCenter = CGPoint(x: arView.bounds.midX, y: arView.bounds.midY)
 
-    // Perform a hit test at the center of the screen
-    let hitTestResults = arView.hitTest(screenCenter, types: .estimatedHorizontalPlane)
+        // Create a ray from the touch location
+        guard let raycastQuery = arView.raycastQuery(from: screenCenter, allowing: .estimatedPlane, alignment: .any) else {
+            return nil
+        }
 
-    // Check if we hit a horizontal plane
-    if let result = hitTestResults.first {
-        // Get the world transform of the hit test result (position in the real world)
-        let hitPosition = SCNVector3(
-            x: result.worldTransform.columns.3.x,
-            y: result.worldTransform.columns.3.y,
-            z: result.worldTransform.columns.3.z
-        )
-        return hitPosition
+        // Perform the raycast
+        let results = arView.session.raycast(raycastQuery)
+
+        if let result = results.first {
+            let translation = result.worldTransform.columns.3
+            let position = SCNVector3(translation.x, translation.y, translation.z)
+
+            return position
+        }
+
+        return nil
     }
-
-    // Return nil if no plane was found
-    return nil
 }
