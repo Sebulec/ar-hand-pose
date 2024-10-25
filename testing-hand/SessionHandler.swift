@@ -64,6 +64,17 @@ final class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
         layer.frame.origin = screenFingerTipPoint
         layer.isHidden = false
     }
+    
+    private func createFingerView(in view: UIView) -> UIView {
+        let finger = UIView(frame: .init(x: 0, y: 0, width: 10, height: 10))
+
+        finger.backgroundColor = .green
+        finger.layer.cornerRadius = 10
+        finger.isHidden = true
+        view.addSubview(finger)
+
+        return finger
+    }
 
     private func verifyIfHandIsPinching() {
         if thumbTipView.frame.origin.distance(to: indexTipView.frame.origin) > 30 {
@@ -80,17 +91,6 @@ final class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
         guard let attachMesh = attachMesh else { return }
 
         manager.performOperation(action: attachMesh)
-    }
-
-    private func createFingerView(in view: UIView) -> UIView {
-        let finger = UIView(frame: .init(x: 0, y: 0, width: 10, height: 10))
-
-        finger.backgroundColor = .green
-        finger.layer.cornerRadius = 10
-        finger.isHidden = true
-        view.addSubview(finger)
-
-        return finger
     }
 
     func attachMeshToScene(in arView: ARSCNView) {
