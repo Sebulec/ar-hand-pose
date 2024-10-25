@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    var sessionHandler = SessionHandler()
+    private let sessionHandler = SessionHandler()
 
     var body: some View {
         ARViewContainer(sessionHandler: sessionHandler)

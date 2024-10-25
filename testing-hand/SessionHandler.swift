@@ -3,14 +3,13 @@ import RealityKit
 import ARKit
 import Vision
 
-class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
+final class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
     var attachMesh: (() -> ())?
 
     private let manager = OperationManager()
     private var thumbTipView: UIView!
     private var indexTipView: UIView!
     private var handPoseRequest = VNDetectHumanHandPoseRequest()
-    private var lastFrameTimestamp: TimeInterval?
 
     func createCircleForThumb(view: UIView) {
         thumbTipView = createFingerView(in: view)
