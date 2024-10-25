@@ -4,7 +4,7 @@ import ARKit
 import Vision
 
 final class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
-    var attachMesh: (() -> ())?
+    weak var arView: ARSCNView?
 
     private let manager = OperationManager()
     private var thumbTipView: UIView!
@@ -88,9 +88,11 @@ final class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
     }
 
     private func performAttachMech() {
-        guard let attachMesh = attachMesh else { return }
+        guard let arView else { return }
 
-        manager.performOperation(action: attachMesh)
+        manager.performOperation(action: { [weak self] in
+            self?.attachMeshToScene(in: arView)
+        })
     }
 
     func attachMeshToScene(in arView: ARSCNView) {
@@ -112,7 +114,7 @@ final class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
         // Create a horizontal plane anchor for the content
         let planeAnchor = ARAnchor(name: "horizontalPlane", transform: simd_float4x4(SCNMatrix4Identity))
 
-        if let position = performHitTestForHorizontalPlane(in: arView) {
+        if let position = performRaycastForHorizontalPlane(in: arView) {
             boxNode.position = position
         }
         // Add the anchor to the session
@@ -126,7 +128,7 @@ final class SessionHandler: NSObject, ObservableObject, ARSessionDelegate {
         arView.scene.rootNode.addChildNode(anchorNode)
     }
 
-    private func performHitTestForHorizontalPlane(in arView: ARSCNView) -> SCNVector3? {
+    private func performRaycastForHorizontalPlane(in arView: ARSCNView) -> SCNVector3? {
         // Get the center point of the screen
         let screenCenter = CGPoint(x: arView.bounds.midX, y: arView.bounds.midY)
 
